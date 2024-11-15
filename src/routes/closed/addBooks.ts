@@ -119,7 +119,7 @@ addBooksRouter.get('/test', (req, res) => {
  * - Must follow basic structure of http://, https://, or ftp://
  *
  * @apiName PostaddBook
- * @apiGroup closed
+ * @apiGroup Books
  *
  * @apiBody {String} bookId the bookId of the book
  * @apiBody {String} isbn the ISBN of the book
