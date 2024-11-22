@@ -50,7 +50,11 @@ const key = {
  * @apiBody {String} password the user's desired new password
  *
  * @apiSuccess {String} accessToken JSON Web Token
- * @apiSuccess {number} id unique user id
+ * @apiSuccess {Object} user a user object
+ * @apiSuccess {string} user.name the first name associated with <code>email</code>
+ * @apiSuccess {string} user.email The email associated with <code>email</code>
+ * @apiSuccess {number} user.role The role associated with <code>email</code>
+ * @apiSuccess {number} user.id The internal user id associated with <code>email</code>
  *
  * @apiError (400: Missing Parameters) {String} message "Missing email or username"
  * @apiError (400: Missing Parameters) {String} message "Missing or invalid password"
@@ -128,7 +132,12 @@ resetPWRouter.put(
                     //We successfully added the user!
                     response.status(201).send({
                         accessToken,
-                        id: userID,
+                        user: {
+                            name: result.rows[0].firstname,
+                            email: result.rows[0].email,
+                            role: result.rows[0].account_role,
+                            id: result.rows[0].account_id,
+                        },
                     });
                 });
             })

@@ -44,10 +44,10 @@ const isValidPhone = (phone: string): boolean =>
 // Role validation
 // Role must be a number between 1 and 3
 // 1: Admin, 2: Mod, 3: User
-const isValidRole = (priority: string): boolean =>
-    validationFunctions.isNumberProvided(priority) &&
-    parseInt(priority) >= 1 &&
-    parseInt(priority) <= 3;
+const isValidRole = (role: string): boolean =>
+    validationFunctions.isNumberProvided(role) &&
+    parseInt(role) >= 1 &&
+    parseInt(role) <= 3;
 
 // Email validation
 // Email must be a valid email address
@@ -108,7 +108,11 @@ const emailMiddlewareCheck = (
  * @apiBody {String} phone a phone number for this user *unique
  *
  * @apiSuccess (Success 201) {string} accessToken a newly created JWT
- * @apiSuccess (Success 201) {number} id unique user id
+ * @apiSuccess (Success 201) {Object} user a user object
+ * @apiSuccess {string} user.name the first name associated with <code>email</code>
+ * @apiSuccess {string} user.email The email associated with <code>email</code>
+ * @apiSuccess {number} user.role The role associated with <code>email</code>
+ * @apiSuccess {number} user.id The internal user id associated with <code>email</code>
  *
  * @apiError (400: Missing Parameters) {String} message "Missing name or username"
  * @apiError (400: Invalid Password) {String} message "Invalid or missing password - please refer to documentation"
@@ -232,7 +236,12 @@ registerRouter.post(
                 //We successfully added the user!
                 response.status(201).send({
                     accessToken,
-                    id: request.id,
+                    user: {
+                        name: request.body.firstname,
+                        email: request.body.email,
+                        role: request.body.role,
+                        id: request.id,
+                    },
                 });
             })
             .catch((error) => {

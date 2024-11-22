@@ -256,7 +256,7 @@ bookRouter.delete('/isbn/:isbn', async (req: Request, res: Response) => {
     const { isbn } = req.params;
 
     try {
-        const query = `DELETE FROM BOOKS WHERE isbn13 = $1 RETURNING *`;
+        const query = `DELETE FROM BOOKS WHERE isbn13 = $1 RETURNING isbn13, authors, title;`;
         const result = await pool.query(query, [isbn]);
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Book not found' });
@@ -287,7 +287,7 @@ bookRouter.delete('/author/:author', async (req: Request, res: Response) => {
     const { author } = req.params;
 
     try {
-        const query = `DELETE FROM BOOKS WHERE authors ILIKE $1 RETURNING *`;
+        const query = `DELETE FROM BOOKS WHERE authors ILIKE $1 RETURNING isbn13, authors, title;`;
         const result = await pool.query(query, [`%${author}%`]);
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Book not found' });
@@ -321,7 +321,7 @@ bookRouter.delete('/title/:title', async (req: Request, res: Response) => {
     const { title } = req.params;
 
     try {
-        const query = `DELETE FROM BOOKS WHERE title ILIKE $1 RETURNING *`;
+        const query = `DELETE FROM BOOKS WHERE title ILIKE $1 RETURNING isbn13, authors, title;`;
         const result = await pool.query(query, [`%${title}%`]);
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Book not found' });
@@ -359,11 +359,11 @@ bookRouter.delete('/title/:title', async (req: Request, res: Response) => {
  *
  */
 bookRouter.delete('/cursor', async (request: Request, response: Response) => {
-    const theQuery = `DELETE FROM Books
+    const theQuery = `DELETE FROM BOOKS
                         WHERE id > $2  
-                        ORDER BY id
+                        ORDER BY id ASC
                         LIMIT $1
-                        RETURNING *;`;
+                        RETURNING isbn13, authors, title;`;
 
     const limit: number =
         isNumberProvided(request.query.limit) && +request.query.limit > 0
@@ -377,12 +377,19 @@ bookRouter.delete('/cursor', async (request: Request, response: Response) => {
     const values = [limit, cursor];
     try {
         const result = await pool.query(theQuery, values);
-        response.status(200).send({
-            message: 'Book deleted successfully',
-            book: result.rows,
+        if (result.rowCount === 0) {
+            return response.status(404).json({ message: 'No books found' });
+        } else {
+            response.status(200).send({
+                message: 'Book(s) deleted successfully',
+                book: result.rows,
+            });
+        }
+    } catch (error) {
+        response.status(500).send({
+            message: 'Error deleting books',
+            error,
         });
-    } catch {
-        response.status(500).json({ message: 'Error deleting books' });
     }
 });
 
