@@ -240,7 +240,7 @@ bookRouter.get('/year/:year', async (req: Request, res: Response) => {
 });
 
 /**
- * @api {delete} /closed/books/:isbn Delete Book by ISBN
+ * @api {delete} /closed/books/isbn/:isbn Delete Book by ISBN
  * @apiName DeleteBookByISBN
  * @apiGroup Books
  *
